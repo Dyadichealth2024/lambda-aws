@@ -1,0 +1,45 @@
+service: my-service
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-west-2
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource:
+            - arn:aws:dynamodb:us-west-2:011528274227:table/Users
+            - arn:aws:dynamodb:us-west-2:011528274227:table/TrainingPoints
+
+functions:
+  registerUser:
+    handler: handler.register
+    events:
+      - http:
+          path: register
+          method: post
+
+  calculateLungHealth:
+    handler: handler.calculate_lung_health_route
+    events:
+      - http:
+          path: calculate_lung_health
+          method: post
+
+  getTrainingPoints:
+    handler: handler.get_training_points
+    events:
+      - http:
+          path: training-points
+          method: get
+          request:
+            parameters:
+              querystrings:
+                type: true
+                category: false
