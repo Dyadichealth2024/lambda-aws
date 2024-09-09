@@ -1,0 +1,4 @@
+boto3
+docx2pdf
+lxml  # This is still required, but pywin32 should be removed
+python-docx

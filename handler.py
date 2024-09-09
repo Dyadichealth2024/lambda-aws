@@ -1,132 +1,86 @@
 import json
-import logging
 import boto3
-from botocore.exceptions import ClientError
+from io import BytesIO
+from docx import Document  # To handle Word file generation
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+s3 = boto3.client('s3')
 
-# Initialize DynamoDB client and resource
-dynamodb_client = boto3.client('dynamodb', region_name='us-west-2')
-dynamodb_resource = boto3.resource('dynamodb', region_name='us-west-2')
-newsletter_table = dynamodb_resource.Table('landingnewsletter')
+# Replace this with your S3 bucket name
+BUCKET_NAME = 'foun-report'
 
-# Initialize SES client
-ses_client = boto3.client('ses', region_name='us-west-2')
-
-# Handler to subscribe a user
-def subscribe(event, context):
-    logging.debug("Received event: %s", json.dumps(event))
+def generate_pdf(event, context):
     try:
+        # Parse input data from the event
         body = json.loads(event['body'])
-        email = body['email']
-        first_name = body['firstName']
-        last_name = body['lastName']
+        breaths_per_minute = body.get('breathsPerMinute')
+        bmi = body.get('bmi')
+        breath_hold_time = body.get('breathHoldTime')
 
-        # Save to DynamoDB
-        response = newsletter_table.put_item(
-            Item={
-                'email': email,
-                'first_name': first_name,
-                'last_name': last_name,
-                'verification_status': 'Pending'
-            }
+        # Create a Word document
+        doc = Document()
+        doc.add_heading('Health Report', 0)
+
+        # Add content based on the inputs that would normally be printed on the frontend
+        if bmi is not None:
+            if bmi < 18.5:
+                doc.add_paragraph(f"Your BMI is {bmi}, which is considered underweight.")
+            elif 18.5 <= bmi < 24.9:
+                doc.add_paragraph(f"Your BMI is {bmi}, which is within the normal range.")
+            elif 25 <= bmi < 29.9:
+                doc.add_paragraph(f"Your BMI is {bmi}, which is considered overweight.")
+            else:
+                doc.add_paragraph(f"Your BMI is {bmi}, which is in the obese range.")
+
+        if breaths_per_minute is not None:
+            if breaths_per_minute < 12:
+                doc.add_paragraph(f"You entered {breaths_per_minute} breaths per minute, which is below the normal range.")
+            elif 12 <= breaths_per_minute <= 20:
+                doc.add_paragraph(f"You entered {breaths_per_minute} breaths per minute, which is within the normal range.")
+            else:
+                doc.add_paragraph(f"You entered {breaths_per_minute} breaths per minute, which is above the normal range.")
+
+        if breath_hold_time is not None:
+            doc.add_paragraph(f"You held your breath for {breath_hold_time} seconds.")
+
+        # Save Word file to a BytesIO stream
+        word_file = BytesIO()
+        doc.save(word_file)
+        word_file.seek(0)
+
+        # Generate a unique file name
+        file_name = f"health_report_{bmi}_{breaths_per_minute}_{breath_hold_time}.docx"
+
+        # Upload the Word document to S3
+        s3.put_object(
+            Bucket=BUCKET_NAME,
+            Key=file_name,
+            Body=word_file.getvalue(),
+            ContentType='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
-        logging.info("User subscribed: %s", json.dumps(response))
 
-        # Send verification email
-        verify_link = f"https://your-frontend-url.com/verify?email={email}"
-        subject = "Please verify your subscription"
-        body_text = f"Hello {first_name},\nPlease verify your email by clicking the link below:\n{verify_link}"
-        body_html = f"<html><body><h3>Hello {first_name},</h3><p>Please verify your email by clicking the link below:</p><a href='{verify_link}'>Verify Email</a></body></html>"
-
-        ses_response = ses_client.send_email(
-            Source='info@dyadic.health',  # Ensure this email is verified in SES
-            Destination={'ToAddresses': [email]},
-            Message={
-                'Subject': {'Data': subject},
-                'Body': {
-                    'Text': {'Data': body_text},
-                    'Html': {'Data': body_html}
-                }
-            }
+        # Generate a pre-signed URL for downloading the document
+        download_url = s3.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': BUCKET_NAME, 'Key': file_name},
+            ExpiresIn=3600  # The URL will expire in 1 hour
         )
-        logging.info("Verification email sent: %s", json.dumps(ses_response))
 
+        # Return the download URL
         return {
-            "statusCode": 200,
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "OPTIONS,POST"
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',  # Allow all origins
+                'Access-Control-Allow-Credentials': True  # Optional, needed if using credentials
             },
-            "body": json.dumps({"message": "Verification email sent"})
+            'body': json.dumps({
+                'message': 'Word document generated successfully',  # Updated to reflect Word file
+                'downloadUrl': download_url  # Fixed variable name
+            })
         }
-    except ClientError as e:
-        logging.error("DynamoDB/SES error: %s", e.response['Error']['Message'])
-        return {
-            "statusCode": 500,
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "OPTIONS,POST"
-            },
-            "body": json.dumps({"error": "DynamoDB/SES error: " + e.response['Error']['Message']})
-        }
+
     except Exception as e:
-        logging.error("Exception: %s", str(e))
         return {
-            "statusCode": 500,
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "OPTIONS,POST"
-            },
-            "body": json.dumps({"error": "Internal server error: " + str(e)})
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)}),
+            'headers': {'Content-Type': 'application/json'}
         }
-
-# Handler to verify a user
-def verify(event, context):
-    logging.debug("Received event: %s", json.dumps(event))
-    try:
-        email = event['queryStringParameters']['email']
-
-        response = newsletter_table.update_item(
-            Key={'email': {'S': email}},
-            UpdateExpression="set verification_status = :s",
-            ExpressionAttributeValues={':s': {'S': 'Verified'}}
-        )
-        logging.info("Verification status updated: %s", json.dumps(response))
-
-        return {
-            "statusCode": 200,
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "OPTIONS,GET"
-            },
-            "body": json.dumps({"message": "Email verified successfully"})
-        }
-    except Exception as e:
-        logging.error("Exception: %s", str(e))
-        return {
-            "statusCode": 500,
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "OPTIONS,GET"
-            },
-            "body": json.dumps({"error": "Internal server error: " + str(e)})
-        }
-
-# Example function to test the setup (optional)
-def hello(event, context):
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Methods": "OPTIONS,GET"
-        },
-        "body": json.dumps({"message": "Hello, World!"})
-    }
