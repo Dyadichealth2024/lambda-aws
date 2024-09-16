@@ -4,28 +4,35 @@ provider:
   name: aws
   runtime: python3.9
   region: us-west-2
-  stage: ${opt:stage, 'dev'}  # Default to 'dev' if no stage is provided
+  stage: dev
 
   iam:
     role:
       statements:
         - Effect: Allow
           Action:
-            - s3:PutObject
-            - s3:GetObject
-            - s3:ListBucket  # Added permission to list the bucket
+            - dynamodb:PutItem
           Resource:
-            - arn:aws:s3:::${self:custom.pdfBucketName}/*
-            - arn:aws:s3:::${self:custom.pdfBucketName}
+            - arn:aws:dynamodb:us-west-2:982081078723:table/landingnewsletter
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+          Resource:
+            - arn:aws:dynamodb:us-west-2:982081078723:table/Register_Data
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: "*"
 
 functions:
-  generatePdf:
-    handler: handler.generate_pdf
+  subscribe_user:
+    handler: handler.subscribe_user
     memorySize: 1024
     timeout: 30
     events:
       - http:
-          path: generate-pdf
+          path: subscribe
           method: post
           cors:
             origin: '*'  # Allow requests from any origin
@@ -36,18 +43,26 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - X-Amz-User-Agent
-            allowCredentials: true  # Allow cookies and credentials (optional based on your use case)
+            allowCredentials: false
 
-custom:
-  pdfBucketName: my-pdf-report-bucket-${self:provider.region}-${self:provider.stage}-${opt:randomSeed, 'default'}
-
-resources:
-  Resources:
-    PdfBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:custom.pdfBucketName}
-        AccessControl: Private  # Ensuring the bucket is private, unless you need public access
+  register_user:
+    handler: handler.register_user
+    memorySize: 1024
+    timeout: 30
+    events:
+      - http:
+          path: register
+          method: post
+          cors:
+            origin: '*'   # Allow requests from any origin
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
 
 plugins:
   - serverless-python-requirements

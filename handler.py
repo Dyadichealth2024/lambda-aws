@@ -1,86 +1,145 @@
 import json
 import boto3
-from io import BytesIO
-from docx import Document  # To handle Word file generation
+from botocore.exceptions import ClientError
+from datetime import datetime
 
-s3 = boto3.client('s3')
+# Initialize DynamoDB
+dynamodb = boto3.resource('dynamodb')
 
-# Replace this with your S3 bucket name
-BUCKET_NAME = 'foun-report'
+# Table for storing subscription data
+newsletter_table = dynamodb.Table('landingnewsletter')
 
-def generate_pdf(event, context):
+# Table for storing registration data
+register_table = dynamodb.Table('Register_Data')  # Replace with your actual table name
+
+# =======================|| Subscribe User Function ||========================
+
+def subscribe_user(event, context):
     try:
-        # Parse input data from the event
+        # Parse the input data from the event
         body = json.loads(event['body'])
-        breaths_per_minute = body.get('breathsPerMinute')
-        bmi = body.get('bmi')
-        breath_hold_time = body.get('breathHoldTime')
+        email = body.get('email')
+        first_name = body.get('firstName')
 
-        # Create a Word document
-        doc = Document()
-        doc.add_heading('Health Report', 0)
-
-        # Add content based on the inputs that would normally be printed on the frontend
-        if bmi is not None:
-            if bmi < 18.5:
-                doc.add_paragraph(f"Your BMI is {bmi}, which is considered underweight.")
-            elif 18.5 <= bmi < 24.9:
-                doc.add_paragraph(f"Your BMI is {bmi}, which is within the normal range.")
-            elif 25 <= bmi < 29.9:
-                doc.add_paragraph(f"Your BMI is {bmi}, which is considered overweight.")
-            else:
-                doc.add_paragraph(f"Your BMI is {bmi}, which is in the obese range.")
-
-        if breaths_per_minute is not None:
-            if breaths_per_minute < 12:
-                doc.add_paragraph(f"You entered {breaths_per_minute} breaths per minute, which is below the normal range.")
-            elif 12 <= breaths_per_minute <= 20:
-                doc.add_paragraph(f"You entered {breaths_per_minute} breaths per minute, which is within the normal range.")
-            else:
-                doc.add_paragraph(f"You entered {breaths_per_minute} breaths per minute, which is above the normal range.")
-
-        if breath_hold_time is not None:
-            doc.add_paragraph(f"You held your breath for {breath_hold_time} seconds.")
-
-        # Save Word file to a BytesIO stream
-        word_file = BytesIO()
-        doc.save(word_file)
-        word_file.seek(0)
-
-        # Generate a unique file name
-        file_name = f"health_report_{bmi}_{breaths_per_minute}_{breath_hold_time}.docx"
-
-        # Upload the Word document to S3
-        s3.put_object(
-            Bucket=BUCKET_NAME,
-            Key=file_name,
-            Body=word_file.getvalue(),
-            ContentType='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        # Store the subscription data in the DynamoDB table
+        newsletter_table.put_item(
+            Item={
+                'email': email,
+                'firstName': first_name,
+                'subscribed_at': str(datetime.utcnow())  # Add a timestamp for the subscription
+            }
         )
 
-        # Generate a pre-signed URL for downloading the document
-        download_url = s3.generate_presigned_url(
-            'get_object',
-            Params={'Bucket': BUCKET_NAME, 'Key': file_name},
-            ExpiresIn=3600  # The URL will expire in 1 hour
-        )
+        # Send subscription confirmation email
+        send_email(email, first_name)
 
-        # Return the download URL
+        # Return success response with CORS headers
         return {
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',  # Allow all origins
-                'Access-Control-Allow-Credentials': True  # Optional, needed if using credentials
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
-            'body': json.dumps({
-                'message': 'Word document generated successfully',  # Updated to reflect Word file
-                'downloadUrl': download_url  # Fixed variable name
-            })
+            'body': json.dumps({'message': 'Subscription successful!'})
         }
 
-    except Exception as e:
+    except ClientError as e:
+        # Log the error and return error response with CORS headers
+        print(f"Error: {e}")
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': str(e)}),
-            'headers': {'Content-Type': 'application/json'}
+            'headers': {
+                'Access-Control-Allow-Origin': '*',  # Ensure CORS headers are included in error response
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
+            },
+            'body': json.dumps({'error': str(e)})
         }
+
+# =======================|| Register User Function ||========================
+
+def register_user(event, context):
+    try:
+        # Parse the input data from the event
+        body = json.loads(event['body'])
+        email = body.get('email')
+        first_name = body.get('firstName')
+        last_name = body.get('lastName')
+        password = body.get('password')  # Ideally, hash this password
+
+        # Check if any required field is missing
+        if not email or not first_name or not last_name or not password:
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',  
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+                },
+                'body': json.dumps({'message': 'All fields are required!'})
+            }
+
+        # Store the registration data in the DynamoDB table
+        register_table.put_item(
+            Item={
+                'email': email,
+                'firstName': first_name,
+                'lastName': last_name,
+                'password': password,  # This should be hashed before saving
+                'created_at': str(datetime.utcnow())  # Add a timestamp of the registration
+            }
+        )
+
+        # Return success response with CORS headers
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',  
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
+            },
+            'body': json.dumps({'message': 'User registered successfully!'})
+        }
+
+    except ClientError as e:
+        # Log the error and return error response with CORS headers
+        print(f"Error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',  
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
+            },
+            'body': json.dumps({'error': str(e)})
+        }
+
+# =======================|| Email Sending Function ||========================
+
+def send_email(email, first_name):
+    SUBJECT = "Thank you for subscribing to our newsletter!"
+    BODY_TEXT = f"Hello {first_name},\n\nThank you for subscribing to our newsletter. We will keep you updated!"
+    SENDER = "info@dyadic.health"  # This should be a verified email in SES
+    RECIPIENT = email
+
+    ses = boto3.client('ses')  # Initialize SES client
+
+    try:
+        # Attempt to send the email via SES
+        response = ses.send_email(
+            Source=SENDER,
+            Destination={
+                'ToAddresses': [RECIPIENT],
+            },
+            Message={
+                'Subject': {'Data': SUBJECT},
+                'Body': {
+                    'Text': {'Data': BODY_TEXT},
+                },
+            },
+        )
+        print(f"Email sent! Message ID: {response['MessageId']}")
+    except ClientError as e:
+        print(f"Failed to send email. Error: {e}")
+        raise e

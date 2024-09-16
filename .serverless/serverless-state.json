@@ -15,14 +15,24 @@
             {
               "Effect": "Allow",
               "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:ListBucket"
+                "dynamodb:PutItem"
               ],
-              "Resource": [
-                "arn:aws:s3:::my-pdf-report-bucket-us-west-2-dev-default/*",
-                "arn:aws:s3:::my-pdf-report-bucket-us-west-2-dev-default"
-              ]
+              "Resource": "arn:aws:dynamodb:us-west-2:982081078723:table/landingnewsletter"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:PutItem"
+              ],
+              "Resource": "arn:aws:dynamodb:us-west-2:982081078723:table/Register_Data"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ses:SendEmail",
+                "ses:SendRawEmail"
+              ],
+              "Resource": "*"
             }
           ]
         }
@@ -101,10 +111,16 @@
               }
             }
           },
-          "GeneratePdfLogGroup": {
+          "SubscribeUnderscoreuserLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/my-service-dev-generatePdf"
+              "LogGroupName": "/aws/lambda/my-service-dev-subscribe_user"
+            }
+          },
+          "RegisterUnderscoreuserLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/my-service-dev-register_user"
             }
           },
           "IamRoleLambdaExecution": {
@@ -167,6 +183,12 @@
                       },
                       {
                         "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][1]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][2]"
                       }
                     ]
                   }
@@ -188,18 +210,18 @@
               }
             }
           },
-          "GeneratePdfLambdaFunction": {
+          "SubscribeUnderscoreuserLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/my-service/dev/1725862026747-2024-09-09T06:07:06.747Z/my-service.zip"
+                "S3Key": "serverless/my-service/dev/1726474757002-2024-09-16T08:19:17.002Z/my-service.zip"
               },
-              "Handler": "handler.generate_pdf",
+              "Handler": "handler.subscribe_user",
               "Runtime": "python3.9",
-              "FunctionName": "my-service-dev-generatePdf",
+              "FunctionName": "my-service-dev-subscribe_user",
               "MemorySize": 1024,
               "Timeout": 30,
               "Role": {
@@ -210,17 +232,52 @@
               }
             },
             "DependsOn": [
-              "GeneratePdfLogGroup"
+              "SubscribeUnderscoreuserLogGroup"
             ]
           },
-          "GeneratePdfLambdaVersionUDRvV0zdmq4wzOOoaQwzU6uakllzzmODjvQwFMdX3k": {
+          "RegisterUnderscoreuserLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/my-service/dev/1726474757002-2024-09-16T08:19:17.002Z/my-service.zip"
+              },
+              "Handler": "handler.register_user",
+              "Runtime": "python3.9",
+              "FunctionName": "my-service-dev-register_user",
+              "MemorySize": 1024,
+              "Timeout": 30,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "RegisterUnderscoreuserLogGroup"
+            ]
+          },
+          "SubscribeUnderscoreuserLambdaVersionF9dv4fRkl5KBGU9sWS9wHFoQ1WLV4Ru9wrciQ2Jc": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "GeneratePdfLambdaFunction"
+                "Ref": "SubscribeUnderscoreuserLambdaFunction"
               },
-              "CodeSha256": "I5ViVoylB4A+cRkNfxgtQ9BtqDFQddtFAR6rPz/Zlvc="
+              "CodeSha256": "5m+oXawFdunLbA4duFF6S4KZz1JvMQEYUahoyyGFxNE="
+            }
+          },
+          "RegisterUnderscoreuserLambdaVersionpj3BcAWGAnVO5BRE3xCMByRtEDX75eFqSPtuGcH4cLo": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "RegisterUnderscoreuserLambdaFunction"
+              },
+              "CodeSha256": "5m+oXawFdunLbA4duFF6S4KZz1JvMQEYUahoyyGFxNE="
             }
           },
           "ApiGatewayRestApi": {
@@ -235,7 +292,7 @@
               "Policy": ""
             }
           },
-          "ApiGatewayResourceGenerateDashpdf": {
+          "ApiGatewayResourceSubscribe": {
             "Type": "AWS::ApiGateway::Resource",
             "Properties": {
               "ParentId": {
@@ -244,13 +301,28 @@
                   "RootResourceId"
                 ]
               },
-              "PathPart": "generate-pdf",
+              "PathPart": "subscribe",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayMethodGenerateDashpdfOptions": {
+          "ApiGatewayResourceRegister": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "register",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodSubscribeOptions": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "AuthorizationType": "NONE",
@@ -261,8 +333,7 @@
                   "ResponseParameters": {
                     "method.response.header.Access-Control-Allow-Origin": true,
                     "method.response.header.Access-Control-Allow-Headers": true,
-                    "method.response.header.Access-Control-Allow-Methods": true,
-                    "method.response.header.Access-Control-Allow-Credentials": true
+                    "method.response.header.Access-Control-Allow-Methods": true
                   },
                   "ResponseModels": {}
                 }
@@ -280,8 +351,7 @@
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'",
                       "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
-                      "method.response.header.Access-Control-Allow-Credentials": "'true'"
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
                       "application/json": ""
@@ -290,20 +360,65 @@
                 ]
               },
               "ResourceId": {
-                "Ref": "ApiGatewayResourceGenerateDashpdf"
+                "Ref": "ApiGatewayResourceSubscribe"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayMethodGenerateDashpdfPost": {
+          "ApiGatewayMethodRegisterOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceRegister"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodSubscribePost": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "HttpMethod": "POST",
               "RequestParameters": {},
               "ResourceId": {
-                "Ref": "ApiGatewayResourceGenerateDashpdf"
+                "Ref": "ApiGatewayResourceSubscribe"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -328,7 +443,7 @@
                       ":lambda:path/2015-03-31/functions/",
                       {
                         "Fn::GetAtt": [
-                          "GeneratePdfLambdaFunction",
+                          "SubscribeUnderscoreuserLambdaFunction",
                           "Arn"
                         ]
                       },
@@ -340,10 +455,56 @@
               "MethodResponses": []
             },
             "DependsOn": [
-              "GeneratePdfLambdaPermissionApiGateway"
+              "SubscribeUnderscoreuserLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1725861985802": {
+          "ApiGatewayMethodRegisterPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceRegister"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "RegisterUnderscoreuserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "RegisterUnderscoreuserLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1726474712145": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -352,16 +513,18 @@
               "StageName": "dev"
             },
             "DependsOn": [
-              "ApiGatewayMethodGenerateDashpdfOptions",
-              "ApiGatewayMethodGenerateDashpdfPost"
+              "ApiGatewayMethodSubscribeOptions",
+              "ApiGatewayMethodRegisterOptions",
+              "ApiGatewayMethodSubscribePost",
+              "ApiGatewayMethodRegisterPost"
             ]
           },
-          "GeneratePdfLambdaPermissionApiGateway": {
+          "SubscribeUnderscoreuserLambdaPermissionApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "GeneratePdfLambdaFunction",
+                  "SubscribeUnderscoreuserLambdaFunction",
                   "Arn"
                 ]
               },
@@ -393,11 +556,41 @@
               }
             }
           },
-          "PdfBucket": {
-            "Type": "AWS::S3::Bucket",
+          "RegisterUnderscoreuserLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
             "Properties": {
-              "BucketName": "my-pdf-report-bucket-us-west-2-dev-default",
-              "AccessControl": "Private"
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "RegisterUnderscoreuserLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
             }
           }
         },
@@ -410,13 +603,22 @@
               "Name": "sls-my-service-dev-ServerlessDeploymentBucketName"
             }
           },
-          "GeneratePdfLambdaFunctionQualifiedArn": {
+          "SubscribeUnderscoreuserLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GeneratePdfLambdaVersionUDRvV0zdmq4wzOOoaQwzU6uakllzzmODjvQwFMdX3k"
+              "Ref": "SubscribeUnderscoreuserLambdaVersionF9dv4fRkl5KBGU9sWS9wHFoQ1WLV4Ru9wrciQ2Jc"
             },
             "Export": {
-              "Name": "sls-my-service-dev-GeneratePdfLambdaFunctionQualifiedArn"
+              "Name": "sls-my-service-dev-SubscribeUnderscoreuserLambdaFunctionQualifiedArn"
+            }
+          },
+          "RegisterUnderscoreuserLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "RegisterUnderscoreuserLambdaVersionpj3BcAWGAnVO5BRE3xCMByRtEDX75eFqSPtuGcH4cLo"
+            },
+            "Export": {
+              "Name": "sls-my-service-dev-RegisterUnderscoreuserLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -531,23 +733,20 @@
       },
       "vpc": {}
     },
-    "custom": {
-      "pdfBucketName": "my-pdf-report-bucket-us-west-2-dev-default"
-    },
     "plugins": [
       "serverless-python-requirements",
       "serverless-offline"
     ],
     "pluginsData": {},
     "functions": {
-      "generatePdf": {
-        "handler": "handler.generate_pdf",
+      "subscribe_user": {
+        "handler": "handler.subscribe_user",
         "memorySize": 1024,
         "timeout": 30,
         "events": [
           {
             "http": {
-              "path": "generate-pdf",
+              "path": "subscribe",
               "method": "post",
               "cors": {
                 "origin": "*",
@@ -563,31 +762,55 @@
                   "X-Amz-Security-Token",
                   "X-Amz-User-Agent"
                 ],
-                "allowCredentials": true
+                "allowCredentials": false
               },
               "integration": "AWS_PROXY"
             }
           }
         ],
-        "name": "my-service-dev-generatePdf",
+        "name": "my-service-dev-subscribe_user",
         "package": {},
         "memory": 1024,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "GeneratePdfLambdaVersionUDRvV0zdmq4wzOOoaQwzU6uakllzzmODjvQwFMdX3k"
-      }
-    },
-    "resources": {
-      "Resources": {
-        "PdfBucket": {
-          "Type": "AWS::S3::Bucket",
-          "Properties": {
-            "BucketName": "my-pdf-report-bucket-us-west-2-dev-default",
-            "AccessControl": "Private"
-          }
-        }
+        "versionLogicalId": "SubscribeUnderscoreuserLambdaVersionF9dv4fRkl5KBGU9sWS9wHFoQ1WLV4Ru9wrciQ2Jc"
       },
-      "Outputs": {}
+      "register_user": {
+        "handler": "handler.register_user",
+        "memorySize": 1024,
+        "timeout": 30,
+        "events": [
+          {
+            "http": {
+              "path": "register",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "my-service-dev-register_user",
+        "package": {},
+        "memory": 1024,
+        "runtime": "python3.9",
+        "vpc": {},
+        "versionLogicalId": "RegisterUnderscoreuserLambdaVersionpj3BcAWGAnVO5BRE3xCMByRtEDX75eFqSPtuGcH4cLo"
+      }
     },
     "configValidationMode": "warn",
     "serviceFilename": "serverless.yml",
@@ -599,12 +822,6 @@
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
       },
-      "custom": {
-        "$ref": "$[\"service\"][\"custom\"]"
-      },
-      "resources": {
-        "$ref": "$[\"service\"][\"resources\"]"
-      },
       "plugins": {
         "$ref": "$[\"service\"][\"plugins\"]"
       }
@@ -612,10 +829,10 @@
     "appId": null,
     "orgId": null,
     "layers": {},
-    "artifact": "C:\\Users\\Praveen\\Desktop\\lambda-main\\.serverless\\my-service.zip"
+    "artifact": "C:\\Users\\Praveen\\Desktop\\lambda\\lambda-aws\\.serverless\\my-service.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/my-service/dev/1725862026747-2024-09-09T06:07:06.747Z",
+    "artifactDirectoryName": "serverless/my-service/dev/1726474757002-2024-09-16T08:19:17.002Z",
     "artifact": "my-service.zip"
   }
 }
