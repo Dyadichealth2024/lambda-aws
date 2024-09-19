@@ -15,16 +15,11 @@
             {
               "Effect": "Allow",
               "Action": [
-                "dynamodb:PutItem"
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:Query"
               ],
-              "Resource": "arn:aws:dynamodb:us-west-2:982081078723:table/landingnewsletter"
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "dynamodb:PutItem"
-              ],
-              "Resource": "arn:aws:dynamodb:us-west-2:982081078723:table/Register_Data"
+              "Resource": "arn:aws:dynamodb:us-west-2:982081078723:table/YourDynamoDBTableName"
             },
             {
               "Effect": "Allow",
@@ -123,6 +118,12 @@
               "LogGroupName": "/aws/lambda/my-service-dev-register_user"
             }
           },
+          "FetchUnderscorequestionsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/my-service-dev-fetch_questions"
+            }
+          },
           "IamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -186,9 +187,6 @@
                       },
                       {
                         "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][1]"
-                      },
-                      {
-                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][2]"
                       }
                     ]
                   }
@@ -217,7 +215,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/my-service/dev/1726474757002-2024-09-16T08:19:17.002Z/my-service.zip"
+                "S3Key": "serverless/my-service/dev/1726723035683-2024-09-19T05:17:15.683Z/my-service.zip"
               },
               "Handler": "handler.subscribe_user",
               "Runtime": "python3.9",
@@ -242,7 +240,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/my-service/dev/1726474757002-2024-09-16T08:19:17.002Z/my-service.zip"
+                "S3Key": "serverless/my-service/dev/1726723035683-2024-09-19T05:17:15.683Z/my-service.zip"
               },
               "Handler": "handler.register_user",
               "Runtime": "python3.9",
@@ -260,24 +258,59 @@
               "RegisterUnderscoreuserLogGroup"
             ]
           },
-          "SubscribeUnderscoreuserLambdaVersionF9dv4fRkl5KBGU9sWS9wHFoQ1WLV4Ru9wrciQ2Jc": {
+          "FetchUnderscorequestionsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/my-service/dev/1726723035683-2024-09-19T05:17:15.683Z/my-service.zip"
+              },
+              "Handler": "trainques.fetch_questions",
+              "Runtime": "python3.9",
+              "FunctionName": "my-service-dev-fetch_questions",
+              "MemorySize": 1024,
+              "Timeout": 30,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "FetchUnderscorequestionsLogGroup"
+            ]
+          },
+          "SubscribeUnderscoreuserLambdaVersionNDyg8JQNLadAhhK8462uGLZNt3079r4YBC8MvMdq4": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "SubscribeUnderscoreuserLambdaFunction"
               },
-              "CodeSha256": "5m+oXawFdunLbA4duFF6S4KZz1JvMQEYUahoyyGFxNE="
+              "CodeSha256": "seRRlSE1N30Nm/fCgHo1aFKY31+f6OdNVIU4dBOS4kA="
             }
           },
-          "RegisterUnderscoreuserLambdaVersionpj3BcAWGAnVO5BRE3xCMByRtEDX75eFqSPtuGcH4cLo": {
+          "RegisterUnderscoreuserLambdaVersionxzgqXC5ffXT0VNdmpJCvK2HBa21x0MbeiFjiAXJieoQ": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "RegisterUnderscoreuserLambdaFunction"
               },
-              "CodeSha256": "5m+oXawFdunLbA4duFF6S4KZz1JvMQEYUahoyyGFxNE="
+              "CodeSha256": "seRRlSE1N30Nm/fCgHo1aFKY31+f6OdNVIU4dBOS4kA="
+            }
+          },
+          "FetchUnderscorequestionsLambdaVersionUIcHcfrkguLXA1NFJN5aZVwdgBsW22OIqGGqhHhec": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "FetchUnderscorequestionsLambdaFunction"
+              },
+              "CodeSha256": "seRRlSE1N30Nm/fCgHo1aFKY31+f6OdNVIU4dBOS4kA="
             }
           },
           "ApiGatewayRestApi": {
@@ -317,6 +350,21 @@
                 ]
               },
               "PathPart": "register",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceQuestions": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "questions",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -406,6 +454,51 @@
               },
               "ResourceId": {
                 "Ref": "ApiGatewayResourceRegister"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodQuestionsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceQuestions"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -504,7 +597,53 @@
               "RegisterUnderscoreuserLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1726474712145": {
+          "ApiGatewayMethodQuestionsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceQuestions"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "FetchUnderscorequestionsLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "FetchUnderscorequestionsLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1726722850322": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -515,8 +654,10 @@
             "DependsOn": [
               "ApiGatewayMethodSubscribeOptions",
               "ApiGatewayMethodRegisterOptions",
+              "ApiGatewayMethodQuestionsOptions",
               "ApiGatewayMethodSubscribePost",
-              "ApiGatewayMethodRegisterPost"
+              "ApiGatewayMethodRegisterPost",
+              "ApiGatewayMethodQuestionsGet"
             ]
           },
           "SubscribeUnderscoreuserLambdaPermissionApiGateway": {
@@ -592,6 +733,43 @@
                 ]
               }
             }
+          },
+          "FetchUnderscorequestionsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "FetchUnderscorequestionsLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
           }
         },
         "Outputs": {
@@ -606,7 +784,7 @@
           "SubscribeUnderscoreuserLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "SubscribeUnderscoreuserLambdaVersionF9dv4fRkl5KBGU9sWS9wHFoQ1WLV4Ru9wrciQ2Jc"
+              "Ref": "SubscribeUnderscoreuserLambdaVersionNDyg8JQNLadAhhK8462uGLZNt3079r4YBC8MvMdq4"
             },
             "Export": {
               "Name": "sls-my-service-dev-SubscribeUnderscoreuserLambdaFunctionQualifiedArn"
@@ -615,10 +793,19 @@
           "RegisterUnderscoreuserLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "RegisterUnderscoreuserLambdaVersionpj3BcAWGAnVO5BRE3xCMByRtEDX75eFqSPtuGcH4cLo"
+              "Ref": "RegisterUnderscoreuserLambdaVersionxzgqXC5ffXT0VNdmpJCvK2HBa21x0MbeiFjiAXJieoQ"
             },
             "Export": {
               "Name": "sls-my-service-dev-RegisterUnderscoreuserLambdaFunctionQualifiedArn"
+            }
+          },
+          "FetchUnderscorequestionsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "FetchUnderscorequestionsLambdaVersionUIcHcfrkguLXA1NFJN5aZVwdgBsW22OIqGGqhHhec"
+            },
+            "Export": {
+              "Name": "sls-my-service-dev-FetchUnderscorequestionsLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -773,7 +960,7 @@
         "memory": 1024,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "SubscribeUnderscoreuserLambdaVersionF9dv4fRkl5KBGU9sWS9wHFoQ1WLV4Ru9wrciQ2Jc"
+        "versionLogicalId": "SubscribeUnderscoreuserLambdaVersionNDyg8JQNLadAhhK8462uGLZNt3079r4YBC8MvMdq4"
       },
       "register_user": {
         "handler": "handler.register_user",
@@ -809,7 +996,43 @@
         "memory": 1024,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "RegisterUnderscoreuserLambdaVersionpj3BcAWGAnVO5BRE3xCMByRtEDX75eFqSPtuGcH4cLo"
+        "versionLogicalId": "RegisterUnderscoreuserLambdaVersionxzgqXC5ffXT0VNdmpJCvK2HBa21x0MbeiFjiAXJieoQ"
+      },
+      "fetch_questions": {
+        "handler": "trainques.fetch_questions",
+        "memorySize": 1024,
+        "timeout": 30,
+        "events": [
+          {
+            "http": {
+              "path": "questions",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "my-service-dev-fetch_questions",
+        "package": {},
+        "memory": 1024,
+        "runtime": "python3.9",
+        "vpc": {},
+        "versionLogicalId": "FetchUnderscorequestionsLambdaVersionUIcHcfrkguLXA1NFJN5aZVwdgBsW22OIqGGqhHhec"
       }
     },
     "configValidationMode": "warn",
@@ -832,7 +1055,7 @@
     "artifact": "C:\\Users\\Praveen\\Desktop\\lambda\\lambda-aws\\.serverless\\my-service.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/my-service/dev/1726474757002-2024-09-16T08:19:17.002Z",
+    "artifactDirectoryName": "serverless/my-service/dev/1726723035683-2024-09-19T05:17:15.683Z",
     "artifact": "my-service.zip"
   }
 }

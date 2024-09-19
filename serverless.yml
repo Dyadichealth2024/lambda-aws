@@ -12,13 +12,10 @@ provider:
         - Effect: Allow
           Action:
             - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:Query
           Resource:
-            - arn:aws:dynamodb:us-west-2:982081078723:table/landingnewsletter
-        - Effect: Allow
-          Action:
-            - dynamodb:PutItem
-          Resource:
-            - arn:aws:dynamodb:us-west-2:982081078723:table/Register_Data
+            - arn:aws:dynamodb:us-west-2:982081078723:table/YourDynamoDBTableName  # Replace with your table name
         - Effect: Allow
           Action:
             - ses:SendEmail
@@ -27,7 +24,7 @@ provider:
 
 functions:
   subscribe_user:
-    handler: handler.subscribe_user
+    handler: handler.subscribe_user  # Existing handler in handler.py
     memorySize: 1024
     timeout: 30
     events:
@@ -35,7 +32,7 @@ functions:
           path: subscribe
           method: post
           cors:
-            origin: '*'  # Allow requests from any origin
+            origin: '*'  
             headers:
               - Content-Type
               - X-Amz-Date
@@ -46,7 +43,7 @@ functions:
             allowCredentials: false
 
   register_user:
-    handler: handler.register_user
+    handler: handler.register_user  # Existing handler in handler.py
     memorySize: 1024
     timeout: 30
     events:
@@ -54,7 +51,26 @@ functions:
           path: register
           method: post
           cors:
-            origin: '*'   # Allow requests from any origin
+            origin: '*'   
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+
+  fetch_questions:
+    handler: trainques.fetch_questions  # New handler in trainques.py
+    memorySize: 1024
+    timeout: 30
+    events:
+      - http:
+          path: questions
+          method: get
+          cors:
+            origin: '*'
             headers:
               - Content-Type
               - X-Amz-Date
