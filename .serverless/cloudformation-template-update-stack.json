@@ -191,7 +191,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/my-service/dev/1726723035683-2024-09-19T05:17:15.683Z/my-service.zip"
+          "S3Key": "serverless/my-service/dev/1726727398710-2024-09-19T06:29:58.710Z/my-service.zip"
         },
         "Handler": "handler.subscribe_user",
         "Runtime": "python3.9",
@@ -216,7 +216,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/my-service/dev/1726723035683-2024-09-19T05:17:15.683Z/my-service.zip"
+          "S3Key": "serverless/my-service/dev/1726727398710-2024-09-19T06:29:58.710Z/my-service.zip"
         },
         "Handler": "handler.register_user",
         "Runtime": "python3.9",
@@ -241,7 +241,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/my-service/dev/1726723035683-2024-09-19T05:17:15.683Z/my-service.zip"
+          "S3Key": "serverless/my-service/dev/1726727398710-2024-09-19T06:29:58.710Z/my-service.zip"
         },
         "Handler": "trainques.fetch_questions",
         "Runtime": "python3.9",
@@ -259,34 +259,34 @@
         "FetchUnderscorequestionsLogGroup"
       ]
     },
-    "SubscribeUnderscoreuserLambdaVersionNDyg8JQNLadAhhK8462uGLZNt3079r4YBC8MvMdq4": {
+    "SubscribeUnderscoreuserLambdaVersionKDGQ7XuAiHXOcBnsM5HDYOjOollMGnRdTateRgmDSc": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "SubscribeUnderscoreuserLambdaFunction"
         },
-        "CodeSha256": "seRRlSE1N30Nm/fCgHo1aFKY31+f6OdNVIU4dBOS4kA="
+        "CodeSha256": "u+yey5HWE/W+Aebt/I4Mv6BaDsDtJPyX+PpglKVeOyc="
       }
     },
-    "RegisterUnderscoreuserLambdaVersionxzgqXC5ffXT0VNdmpJCvK2HBa21x0MbeiFjiAXJieoQ": {
+    "RegisterUnderscoreuserLambdaVersionvs6lHVj1nj8Uj7LgKcf0fQzySKgJfseH8ecYyqoTftw": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "RegisterUnderscoreuserLambdaFunction"
         },
-        "CodeSha256": "seRRlSE1N30Nm/fCgHo1aFKY31+f6OdNVIU4dBOS4kA="
+        "CodeSha256": "u+yey5HWE/W+Aebt/I4Mv6BaDsDtJPyX+PpglKVeOyc="
       }
     },
-    "FetchUnderscorequestionsLambdaVersionUIcHcfrkguLXA1NFJN5aZVwdgBsW22OIqGGqhHhec": {
+    "FetchUnderscorequestionsLambdaVersionbqPrQut1FXYDH44Elk4kfpK1jLWIcqoi6UrMkKXjUWY": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "FetchUnderscorequestionsLambdaFunction"
         },
-        "CodeSha256": "seRRlSE1N30Nm/fCgHo1aFKY31+f6OdNVIU4dBOS4kA="
+        "CodeSha256": "u+yey5HWE/W+Aebt/I4Mv6BaDsDtJPyX+PpglKVeOyc="
       }
     },
     "ApiGatewayRestApi": {
@@ -619,7 +619,7 @@
         "FetchUnderscorequestionsLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1726722850322": {
+    "ApiGatewayDeployment1726727335930": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -760,7 +760,7 @@
     "SubscribeUnderscoreuserLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "SubscribeUnderscoreuserLambdaVersionNDyg8JQNLadAhhK8462uGLZNt3079r4YBC8MvMdq4"
+        "Ref": "SubscribeUnderscoreuserLambdaVersionKDGQ7XuAiHXOcBnsM5HDYOjOollMGnRdTateRgmDSc"
       },
       "Export": {
         "Name": "sls-my-service-dev-SubscribeUnderscoreuserLambdaFunctionQualifiedArn"
@@ -769,7 +769,7 @@
     "RegisterUnderscoreuserLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "RegisterUnderscoreuserLambdaVersionxzgqXC5ffXT0VNdmpJCvK2HBa21x0MbeiFjiAXJieoQ"
+        "Ref": "RegisterUnderscoreuserLambdaVersionvs6lHVj1nj8Uj7LgKcf0fQzySKgJfseH8ecYyqoTftw"
       },
       "Export": {
         "Name": "sls-my-service-dev-RegisterUnderscoreuserLambdaFunctionQualifiedArn"
@@ -778,7 +778,7 @@
     "FetchUnderscorequestionsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "FetchUnderscorequestionsLambdaVersionUIcHcfrkguLXA1NFJN5aZVwdgBsW22OIqGGqhHhec"
+        "Ref": "FetchUnderscorequestionsLambdaVersionbqPrQut1FXYDH44Elk4kfpK1jLWIcqoi6UrMkKXjUWY"
       },
       "Export": {
         "Name": "sls-my-service-dev-FetchUnderscorequestionsLambdaFunctionQualifiedArn"

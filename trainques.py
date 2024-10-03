@@ -30,7 +30,7 @@ def fetch_questions(event, context):
                 'body': json.dumps({'error': 'Missing relationshipType query parameter'}),
                 'headers': {
                     'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': '*',  # Enable CORS
                 }
             }
 
@@ -40,8 +40,7 @@ def fetch_questions(event, context):
         )
         
         items = response.get('Items', [])
-        unique_questions = {item['QuestionID']: item for item in items}.values() if items else []
-        native_items = decimal_to_native_type(list(unique_questions))
+        native_items = decimal_to_native_type(items)
 
         return {
             'statusCode': 200,
