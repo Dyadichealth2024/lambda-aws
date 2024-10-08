@@ -5,7 +5,8 @@ provider:
   runtime: python3.9
   region: us-west-2
   stage: dev
-
+  deploymentBucket:
+    name: serverless-framework-deployments-us-west-2-25f8a04b-4c16
   iam:
     role:
       statements:
@@ -15,16 +16,24 @@ provider:
             - dynamodb:GetItem
             - dynamodb:Query
           Resource:
-            - arn:aws:dynamodb:us-west-2:982081078723:table/YourDynamoDBTableName  # Replace with your table name
+            - arn:aws:dynamodb:us-west-2:982081078723:table/RelationshipFeedback
+            - arn:aws:dynamodb:us-west-2:982081078723:table/posturereport
+            - arn:aws:dynamodb:us-west-2:982081078723:table/dietreport
+
         - Effect: Allow
           Action:
             - ses:SendEmail
             - ses:SendRawEmail
           Resource: "*"
 
+  environment:
+    DYNAMODB_TABLE_RELATIONSHIP: RelationshipFeedback
+    DYNAMODB_TABLE_POSTURE: posturereport
+    DYNAMODB_TABLE_DIET: DietFeedback
+
 functions:
   subscribe_user:
-    handler: handler.subscribe_user  # Existing handler in handler.py
+    handler: handler.subscribe_user
     memorySize: 1024
     timeout: 30
     events:
@@ -32,7 +41,7 @@ functions:
           path: subscribe
           method: post
           cors:
-            origin: '*'  
+            origin: '*'
             headers:
               - Content-Type
               - X-Amz-Date
@@ -43,7 +52,7 @@ functions:
             allowCredentials: false
 
   register_user:
-    handler: handler.register_user  # Existing handler in handler.py
+    handler: handler.register_user
     memorySize: 1024
     timeout: 30
     events:
@@ -51,7 +60,7 @@ functions:
           path: register
           method: post
           cors:
-            origin: '*'   
+            origin: '*'
             headers:
               - Content-Type
               - X-Amz-Date
@@ -62,13 +71,51 @@ functions:
             allowCredentials: false
 
   fetch_questions:
-    handler: trainques.fetch_questions  # New handler in trainques.py
+    handler: trainques.fetch_questions
     memorySize: 1024
     timeout: 30
     events:
       - http:
           path: questions
           method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+
+  getPostureReport:
+    handler: posture.lambda_handler
+    memorySize: 1024
+    timeout: 30
+    events:
+      - http:
+          path: posture/{postureId}
+          method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+
+  getDietReport:
+    handler: diet.lambda_handler  # Ensure the correct file name (diet.py) and function (lambda_handler)
+    memorySize: 1024
+    timeout: 30
+    events:
+      - http:
+          path: diet
+          method: post
           cors:
             origin: '*'
             headers:

@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\Praveen\Desktop\lambda\lambda-aws\venv
+set VIRTUAL_ENV=C:\Users\Praveen\Desktop\lambda2\lambda-aws\venv
 
 if not defined PROMPT set PROMPT=$P$G
 
