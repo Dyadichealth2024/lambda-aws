@@ -1,16 +1,10 @@
 import json
 import boto3
 from boto3.dynamodb.conditions import Key
-import os
 
 # Initialize the DynamoDB resource
-TABLE_NAME = 'posturereport'
-TABLE_NAME = os.environ.get('posturereport')
-
-if not TABLE_NAME:
-    raise ValueError("DynamoDB table name not set. Ensure 'posturereport' environment variable is configured.")
-
-
+dynamodb = boto3.resource('dynamodb')
+TABLE_NAME = 'posturereport'  # Your DynamoDB table name
 
 def get_posture_report(posture_id):
     table = dynamodb.Table(TABLE_NAME)
