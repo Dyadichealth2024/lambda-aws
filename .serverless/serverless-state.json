@@ -80,6 +80,12 @@
               "LogGroupName": "/aws/lambda/my-service-dev-getDietReport"
             }
           },
+          "CalculateUnderscorebmiLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/my-service-dev-calculate_bmi"
+            }
+          },
           "IamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -169,7 +175,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-                "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
+                "S3Key": "serverless/my-service/dev/1728544592625-2024-10-10T07:16:32.625Z/my-service.zip"
               },
               "Handler": "handler.subscribe_user",
               "Runtime": "python3.9",
@@ -199,7 +205,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-                "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
+                "S3Key": "serverless/my-service/dev/1728544592625-2024-10-10T07:16:32.625Z/my-service.zip"
               },
               "Handler": "handler.register_user",
               "Runtime": "python3.9",
@@ -229,7 +235,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-                "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
+                "S3Key": "serverless/my-service/dev/1728544592625-2024-10-10T07:16:32.625Z/my-service.zip"
               },
               "Handler": "trainques.fetch_questions",
               "Runtime": "python3.9",
@@ -259,7 +265,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-                "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
+                "S3Key": "serverless/my-service/dev/1728544592625-2024-10-10T07:16:32.625Z/my-service.zip"
               },
               "Handler": "posture.lambda_handler",
               "Runtime": "python3.9",
@@ -289,7 +295,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-                "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
+                "S3Key": "serverless/my-service/dev/1728544592625-2024-10-10T07:16:32.625Z/my-service.zip"
               },
               "Handler": "diet.lambda_handler",
               "Runtime": "python3.9",
@@ -314,54 +320,94 @@
               "GetDietReportLogGroup"
             ]
           },
-          "SubscribeUnderscoreuserLambdaVersionlYzzc3lNM92J1iKHAOE3TXqM1dybncKB9XILsPry68": {
+          "CalculateUnderscorebmiLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
+                "S3Key": "serverless/my-service/dev/1728544592625-2024-10-10T07:16:32.625Z/my-service.zip"
+              },
+              "Handler": "bmi.lambda_handler",
+              "Runtime": "python3.9",
+              "FunctionName": "my-service-dev-calculate_bmi",
+              "MemorySize": 1024,
+              "Timeout": 30,
+              "Environment": {
+                "Variables": {
+                  "DYNAMODB_TABLE_RELATIONSHIP": "RelationshipFeedback",
+                  "DYNAMODB_TABLE_POSTURE": "posturereport",
+                  "DYNAMODB_TABLE_DIET": "DietFeedback"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CalculateUnderscorebmiLogGroup"
+            ]
+          },
+          "SubscribeUnderscoreuserLambdaVersiong47YtzmMTCk4przpLaaEyFFVOPTqYfgoUVV1WIdlDo": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "SubscribeUnderscoreuserLambdaFunction"
               },
-              "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
+              "CodeSha256": "5310dyJNXSJk3lZEcgyefiEMInJx81QX+BklmjBBeuo="
             }
           },
-          "RegisterUnderscoreuserLambdaVersiongTwHMT6nffjerZJR3bj8bGRSXxMNXYYP8Yrcn10jk": {
+          "RegisterUnderscoreuserLambdaVersionM2erPLz7Nvr5QtBb4yrqbtNQP0csvP2PwAzceTiDg0": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "RegisterUnderscoreuserLambdaFunction"
               },
-              "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
+              "CodeSha256": "5310dyJNXSJk3lZEcgyefiEMInJx81QX+BklmjBBeuo="
             }
           },
-          "FetchUnderscorequestionsLambdaVersionRH0O7RX9Gc66dQoE8zmA0Pk1W99DYrbZWvrhwTlys": {
+          "FetchUnderscorequestionsLambdaVersionpDvhzGAIQ2BInml1EvNBkD7NrKLbSWF9deRpqpt8lY": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "FetchUnderscorequestionsLambdaFunction"
               },
-              "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
+              "CodeSha256": "5310dyJNXSJk3lZEcgyefiEMInJx81QX+BklmjBBeuo="
             }
           },
-          "GetPostureReportLambdaVersionJtPJOieL7c2u46oBU6XC5JN7fcT5JPFYHPQLFb0H4": {
+          "GetPostureReportLambdaVersionM5KUVHnDjw2dGMtefJ8jpmA4weFlv9HfoLsyaqHoWBQ": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetPostureReportLambdaFunction"
               },
-              "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
+              "CodeSha256": "5310dyJNXSJk3lZEcgyefiEMInJx81QX+BklmjBBeuo="
             }
           },
-          "GetDietReportLambdaVersion6rL8fBnF3KjMul26TyhO3k0NY6r4UzxHoLpkA2q8K6U": {
+          "GetDietReportLambdaVersionSo9Z8O52PqVjAiV1s7YiEbzKgDCbQJSp4Wj5xl5Usbg": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetDietReportLambdaFunction"
               },
-              "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
+              "CodeSha256": "5310dyJNXSJk3lZEcgyefiEMInJx81QX+BklmjBBeuo="
+            }
+          },
+          "CalculateUnderscorebmiLambdaVersion7KkRfHwfF8smEKGjOaXMVJbW7WGmgCe54pjMVCtvXs": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CalculateUnderscorebmiLambdaFunction"
+              },
+              "CodeSha256": "5310dyJNXSJk3lZEcgyefiEMInJx81QX+BklmjBBeuo="
             }
           },
           "ApiGatewayRestApi": {
@@ -458,6 +504,21 @@
                 ]
               },
               "PathPart": "diet",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceBmi": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "bmi",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -682,6 +743,51 @@
               },
               "ResourceId": {
                 "Ref": "ApiGatewayResourceDiet"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodBmiOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceBmi"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -918,7 +1024,53 @@
               "GetDietReportLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1728542020542": {
+          "ApiGatewayMethodBmiPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceBmi"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "CalculateUnderscorebmiLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "CalculateUnderscorebmiLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1728544523494": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -932,11 +1084,13 @@
               "ApiGatewayMethodQuestionsOptions",
               "ApiGatewayMethodPosturePostureidVarOptions",
               "ApiGatewayMethodDietOptions",
+              "ApiGatewayMethodBmiOptions",
               "ApiGatewayMethodSubscribePost",
               "ApiGatewayMethodRegisterPost",
               "ApiGatewayMethodQuestionsGet",
               "ApiGatewayMethodPosturePostureidVarGet",
-              "ApiGatewayMethodDietPost"
+              "ApiGatewayMethodDietPost",
+              "ApiGatewayMethodBmiPost"
             ]
           },
           "SubscribeUnderscoreuserLambdaPermissionApiGateway": {
@@ -1123,6 +1277,43 @@
                 ]
               }
             }
+          },
+          "CalculateUnderscorebmiLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CalculateUnderscorebmiLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
           }
         },
         "Outputs": {
@@ -1135,7 +1326,7 @@
           "SubscribeUnderscoreuserLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "SubscribeUnderscoreuserLambdaVersionlYzzc3lNM92J1iKHAOE3TXqM1dybncKB9XILsPry68"
+              "Ref": "SubscribeUnderscoreuserLambdaVersiong47YtzmMTCk4przpLaaEyFFVOPTqYfgoUVV1WIdlDo"
             },
             "Export": {
               "Name": "sls-my-service-dev-SubscribeUnderscoreuserLambdaFunctionQualifiedArn"
@@ -1144,7 +1335,7 @@
           "RegisterUnderscoreuserLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "RegisterUnderscoreuserLambdaVersiongTwHMT6nffjerZJR3bj8bGRSXxMNXYYP8Yrcn10jk"
+              "Ref": "RegisterUnderscoreuserLambdaVersionM2erPLz7Nvr5QtBb4yrqbtNQP0csvP2PwAzceTiDg0"
             },
             "Export": {
               "Name": "sls-my-service-dev-RegisterUnderscoreuserLambdaFunctionQualifiedArn"
@@ -1153,7 +1344,7 @@
           "FetchUnderscorequestionsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "FetchUnderscorequestionsLambdaVersionRH0O7RX9Gc66dQoE8zmA0Pk1W99DYrbZWvrhwTlys"
+              "Ref": "FetchUnderscorequestionsLambdaVersionpDvhzGAIQ2BInml1EvNBkD7NrKLbSWF9deRpqpt8lY"
             },
             "Export": {
               "Name": "sls-my-service-dev-FetchUnderscorequestionsLambdaFunctionQualifiedArn"
@@ -1162,7 +1353,7 @@
           "GetPostureReportLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetPostureReportLambdaVersionJtPJOieL7c2u46oBU6XC5JN7fcT5JPFYHPQLFb0H4"
+              "Ref": "GetPostureReportLambdaVersionM5KUVHnDjw2dGMtefJ8jpmA4weFlv9HfoLsyaqHoWBQ"
             },
             "Export": {
               "Name": "sls-my-service-dev-GetPostureReportLambdaFunctionQualifiedArn"
@@ -1171,10 +1362,19 @@
           "GetDietReportLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetDietReportLambdaVersion6rL8fBnF3KjMul26TyhO3k0NY6r4UzxHoLpkA2q8K6U"
+              "Ref": "GetDietReportLambdaVersionSo9Z8O52PqVjAiV1s7YiEbzKgDCbQJSp4Wj5xl5Usbg"
             },
             "Export": {
               "Name": "sls-my-service-dev-GetDietReportLambdaFunctionQualifiedArn"
+            }
+          },
+          "CalculateUnderscorebmiLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CalculateUnderscorebmiLambdaVersion7KkRfHwfF8smEKGjOaXMVJbW7WGmgCe54pjMVCtvXs"
+            },
+            "Export": {
+              "Name": "sls-my-service-dev-CalculateUnderscorebmiLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -1247,7 +1447,7 @@
         "memory": 1024,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "SubscribeUnderscoreuserLambdaVersionlYzzc3lNM92J1iKHAOE3TXqM1dybncKB9XILsPry68"
+        "versionLogicalId": "SubscribeUnderscoreuserLambdaVersiong47YtzmMTCk4przpLaaEyFFVOPTqYfgoUVV1WIdlDo"
       },
       "register_user": {
         "handler": "handler.register_user",
@@ -1283,7 +1483,7 @@
         "memory": 1024,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "RegisterUnderscoreuserLambdaVersiongTwHMT6nffjerZJR3bj8bGRSXxMNXYYP8Yrcn10jk"
+        "versionLogicalId": "RegisterUnderscoreuserLambdaVersionM2erPLz7Nvr5QtBb4yrqbtNQP0csvP2PwAzceTiDg0"
       },
       "fetch_questions": {
         "handler": "trainques.fetch_questions",
@@ -1319,7 +1519,7 @@
         "memory": 1024,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "FetchUnderscorequestionsLambdaVersionRH0O7RX9Gc66dQoE8zmA0Pk1W99DYrbZWvrhwTlys"
+        "versionLogicalId": "FetchUnderscorequestionsLambdaVersionpDvhzGAIQ2BInml1EvNBkD7NrKLbSWF9deRpqpt8lY"
       },
       "getPostureReport": {
         "handler": "posture.lambda_handler",
@@ -1355,7 +1555,7 @@
         "memory": 1024,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "GetPostureReportLambdaVersionJtPJOieL7c2u46oBU6XC5JN7fcT5JPFYHPQLFb0H4"
+        "versionLogicalId": "GetPostureReportLambdaVersionM5KUVHnDjw2dGMtefJ8jpmA4weFlv9HfoLsyaqHoWBQ"
       },
       "getDietReport": {
         "handler": "diet.lambda_handler",
@@ -1391,7 +1591,43 @@
         "memory": 1024,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "GetDietReportLambdaVersion6rL8fBnF3KjMul26TyhO3k0NY6r4UzxHoLpkA2q8K6U"
+        "versionLogicalId": "GetDietReportLambdaVersionSo9Z8O52PqVjAiV1s7YiEbzKgDCbQJSp4Wj5xl5Usbg"
+      },
+      "calculate_bmi": {
+        "handler": "bmi.lambda_handler",
+        "memorySize": 1024,
+        "timeout": 30,
+        "events": [
+          {
+            "http": {
+              "path": "bmi",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "my-service-dev-calculate_bmi",
+        "package": {},
+        "memory": 1024,
+        "runtime": "python3.9",
+        "vpc": {},
+        "versionLogicalId": "CalculateUnderscorebmiLambdaVersion7KkRfHwfF8smEKGjOaXMVJbW7WGmgCe54pjMVCtvXs"
       }
     },
     "configValidationMode": "warn",
@@ -1414,7 +1650,7 @@
     "artifact": "C:\\Users\\Praveen\\Desktop\\lambda2\\lambda-aws\\.serverless\\my-service.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z",
+    "artifactDirectoryName": "serverless/my-service/dev/1728544592625-2024-10-10T07:16:32.625Z",
     "artifact": "my-service.zip"
   }
 }

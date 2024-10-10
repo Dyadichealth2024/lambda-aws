@@ -109,12 +109,32 @@ functions:
             allowCredentials: false
 
   getDietReport:
-    handler: diet.lambda_handler  # Ensure the correct file name (diet.py) and function (lambda_handler)
+    handler: diet.lambda_handler
     memorySize: 1024
     timeout: 30
     events:
       - http:
           path: diet
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+
+  # New function to calculate BMI
+  calculate_bmi:
+    handler: bmi.lambda_handler  # Assuming the Python file for BMI is bmi.py
+    memorySize: 1024
+    timeout: 30
+    events:
+      - http:
+          path: bmi
           method: post
           cors:
             origin: '*'
