@@ -10,7 +10,7 @@ def lambda_handler(event, context):
     try:
         # Get user input from the body of the request
         body = json.loads(event['body'])  # Assuming you are sending a JSON payload
-        veggies = body.get('veggies', 0)  # Provide default value if not found
+        veggies = body.get('vegetables', 0)  # Provide default value if not found
         protein = body.get('protein', 0)
         grains = body.get('grains', 0)
         nutsSeeds = body.get('nutsSeeds', 0)
@@ -36,6 +36,16 @@ def lambda_handler(event, context):
             else:
                 return "above"
         
+        # Map full food group names to reportId keys
+        report_id_mapping = {
+            "vegetables": "veg",
+            "protein": "protein",
+            "grains": "grains",
+            "nutsSeeds": "nuts",
+            "dairy": "dairy",
+            "fruits": "fruits"
+        }
+        
         # Prepare recommendations
         food_groups = ["vegetables", "protein", "grains", "nutsSeeds", "dairy", "fruits"]
         user_intake = [veggies, protein, grains, nutsSeeds, dairy, fruits]
@@ -43,7 +53,10 @@ def lambda_handler(event, context):
 
         for i, group in enumerate(food_groups):
             intake_category = determine_category(group, user_intake[i])
-            report_id = f"{group}-{intake_category}"  # e.g., "veg-below"
+            
+            # Use the report_id_mapping to create the correct report ID
+            mapped_group = report_id_mapping[group]  # Get the mapped name (e.g., 'veg' for 'vegetables')
+            report_id = f"{mapped_group}-{intake_category}"  # e.g., "veg-below", "nuts-above"
             
             try:
                 # Query DynamoDB for the recommendation based on reportId

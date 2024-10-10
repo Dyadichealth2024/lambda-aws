@@ -136,7 +136,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-          "S3Key": "serverless/my-service/dev/1728367551673-2024-10-08T06:05:51.673Z/my-service.zip"
+          "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
         },
         "Handler": "handler.subscribe_user",
         "Runtime": "python3.9",
@@ -166,7 +166,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-          "S3Key": "serverless/my-service/dev/1728367551673-2024-10-08T06:05:51.673Z/my-service.zip"
+          "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
         },
         "Handler": "handler.register_user",
         "Runtime": "python3.9",
@@ -196,7 +196,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-          "S3Key": "serverless/my-service/dev/1728367551673-2024-10-08T06:05:51.673Z/my-service.zip"
+          "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
         },
         "Handler": "trainques.fetch_questions",
         "Runtime": "python3.9",
@@ -226,7 +226,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-          "S3Key": "serverless/my-service/dev/1728367551673-2024-10-08T06:05:51.673Z/my-service.zip"
+          "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
         },
         "Handler": "posture.lambda_handler",
         "Runtime": "python3.9",
@@ -256,7 +256,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-west-2-25f8a04b-4c16",
-          "S3Key": "serverless/my-service/dev/1728367551673-2024-10-08T06:05:51.673Z/my-service.zip"
+          "S3Key": "serverless/my-service/dev/1728542142661-2024-10-10T06:35:42.661Z/my-service.zip"
         },
         "Handler": "diet.lambda_handler",
         "Runtime": "python3.9",
@@ -281,54 +281,54 @@
         "GetDietReportLogGroup"
       ]
     },
-    "SubscribeUnderscoreuserLambdaVersion9nJPsz3yWRVnN6YxUiGfcjWDWY0LAAjk7egED8gCs": {
+    "SubscribeUnderscoreuserLambdaVersionlYzzc3lNM92J1iKHAOE3TXqM1dybncKB9XILsPry68": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "SubscribeUnderscoreuserLambdaFunction"
         },
-        "CodeSha256": "cIsf2t03SKrEiJbjLoTI3Gd9nrb2j7ZFoYi4AlvztvA="
+        "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
       }
     },
-    "RegisterUnderscoreuserLambdaVersion5Pkb5zDYGCMCxpqP3keXCWEGB05ivs4dUl657vdU8": {
+    "RegisterUnderscoreuserLambdaVersiongTwHMT6nffjerZJR3bj8bGRSXxMNXYYP8Yrcn10jk": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "RegisterUnderscoreuserLambdaFunction"
         },
-        "CodeSha256": "cIsf2t03SKrEiJbjLoTI3Gd9nrb2j7ZFoYi4AlvztvA="
+        "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
       }
     },
-    "FetchUnderscorequestionsLambdaVersionqgR2rxuFY7N3Md5fcBwRbYiaEdR43DQUfhHEE9EDHU": {
+    "FetchUnderscorequestionsLambdaVersionRH0O7RX9Gc66dQoE8zmA0Pk1W99DYrbZWvrhwTlys": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "FetchUnderscorequestionsLambdaFunction"
         },
-        "CodeSha256": "cIsf2t03SKrEiJbjLoTI3Gd9nrb2j7ZFoYi4AlvztvA="
+        "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
       }
     },
-    "GetPostureReportLambdaVersion9ayKyl1B3gStk2nXMoLxXZtehnNSlwnETeLsRaAJ4": {
+    "GetPostureReportLambdaVersionJtPJOieL7c2u46oBU6XC5JN7fcT5JPFYHPQLFb0H4": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetPostureReportLambdaFunction"
         },
-        "CodeSha256": "cIsf2t03SKrEiJbjLoTI3Gd9nrb2j7ZFoYi4AlvztvA="
+        "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
       }
     },
-    "GetDietReportLambdaVersionPnHNEUL7ktLmgy9rpPTLHiXaXV3zkkZJBIij4K8": {
+    "GetDietReportLambdaVersion6rL8fBnF3KjMul26TyhO3k0NY6r4UzxHoLpkA2q8K6U": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetDietReportLambdaFunction"
         },
-        "CodeSha256": "cIsf2t03SKrEiJbjLoTI3Gd9nrb2j7ZFoYi4AlvztvA="
+        "CodeSha256": "jmDvOI+WxzA2nqVu+POekMRLABZD6ywIUgE+HOkdolo="
       }
     },
     "ApiGatewayRestApi": {
@@ -885,7 +885,7 @@
         "GetDietReportLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1728367508860": {
+    "ApiGatewayDeployment1728542020542": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -1102,7 +1102,7 @@
     "SubscribeUnderscoreuserLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "SubscribeUnderscoreuserLambdaVersion9nJPsz3yWRVnN6YxUiGfcjWDWY0LAAjk7egED8gCs"
+        "Ref": "SubscribeUnderscoreuserLambdaVersionlYzzc3lNM92J1iKHAOE3TXqM1dybncKB9XILsPry68"
       },
       "Export": {
         "Name": "sls-my-service-dev-SubscribeUnderscoreuserLambdaFunctionQualifiedArn"
@@ -1111,7 +1111,7 @@
     "RegisterUnderscoreuserLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "RegisterUnderscoreuserLambdaVersion5Pkb5zDYGCMCxpqP3keXCWEGB05ivs4dUl657vdU8"
+        "Ref": "RegisterUnderscoreuserLambdaVersiongTwHMT6nffjerZJR3bj8bGRSXxMNXYYP8Yrcn10jk"
       },
       "Export": {
         "Name": "sls-my-service-dev-RegisterUnderscoreuserLambdaFunctionQualifiedArn"
@@ -1120,7 +1120,7 @@
     "FetchUnderscorequestionsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "FetchUnderscorequestionsLambdaVersionqgR2rxuFY7N3Md5fcBwRbYiaEdR43DQUfhHEE9EDHU"
+        "Ref": "FetchUnderscorequestionsLambdaVersionRH0O7RX9Gc66dQoE8zmA0Pk1W99DYrbZWvrhwTlys"
       },
       "Export": {
         "Name": "sls-my-service-dev-FetchUnderscorequestionsLambdaFunctionQualifiedArn"
@@ -1129,7 +1129,7 @@
     "GetPostureReportLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetPostureReportLambdaVersion9ayKyl1B3gStk2nXMoLxXZtehnNSlwnETeLsRaAJ4"
+        "Ref": "GetPostureReportLambdaVersionJtPJOieL7c2u46oBU6XC5JN7fcT5JPFYHPQLFb0H4"
       },
       "Export": {
         "Name": "sls-my-service-dev-GetPostureReportLambdaFunctionQualifiedArn"
@@ -1138,7 +1138,7 @@
     "GetDietReportLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetDietReportLambdaVersionPnHNEUL7ktLmgy9rpPTLHiXaXV3zkkZJBIij4K8"
+        "Ref": "GetDietReportLambdaVersion6rL8fBnF3KjMul26TyhO3k0NY6r4UzxHoLpkA2q8K6U"
       },
       "Export": {
         "Name": "sls-my-service-dev-GetDietReportLambdaFunctionQualifiedArn"
