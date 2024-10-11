@@ -1,4 +1,4 @@
-#!C:\Users\Praveen\Desktop\lambda-main\venv\scripts\python.exe
+#!C:\Users\jayad_kvlqwmk\OneDrive\Desktop\lambda\lambda-aws\.venv\scripts\python.exe
 
 import sys
 import json

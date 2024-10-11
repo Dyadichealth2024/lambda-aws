@@ -1,40 +1,19 @@
 import json
 import boto3
-import jwt  # Add this for JWT creation
 from botocore.exceptions import ClientError
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Initialize DynamoDB
 dynamodb = boto3.resource('dynamodb')
+
+# Initialize SES
+ses_client = boto3.client('ses', region_name='us-west-2')  # Replace with your actual SES region
 
 # Table for storing subscription data
 newsletter_table = dynamodb.Table('landingnewsletter')
 
 # Table for storing registration data
 register_table = dynamodb.Table('Register_Data')  # Replace with your actual table name
-
-# Secret key for JWT signing (Store this securely in a secret manager or environment variable)
-SECRET_KEY = "your_secret_key"  # Replace this with a secure key
-
-# =======================|| JWT Creation and Validation Functions ||========================
-
-def create_jwt_token(email, expiration_minutes=60):
-    """Generate JWT Token with expiration"""
-    payload = {
-        'email': email,
-        'exp': datetime.utcnow() + timedelta(minutes=expiration_minutes)  # Token expires in 60 minutes by default
-    }
-    return jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-
-def decode_jwt_token(token):
-    """Decode JWT Token"""
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-        return payload  # Returns the decoded payload if token is valid
-    except jwt.ExpiredSignatureError:
-        return None  # Token has expired
-    except jwt.InvalidTokenError:
-        return None  # Invalid token
 
 # =======================|| Register User Function ||========================
 
@@ -52,7 +31,7 @@ def register_user(event, context):
             return {
                 'statusCode': 400,
                 'headers': {
-                    'Access-Control-Allow-Origin': '*',  
+                    'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
                     'Access-Control-Allow-Methods': 'POST, OPTIONS'
                 },
@@ -70,18 +49,15 @@ def register_user(event, context):
             }
         )
 
-        # Generate a JWT token for the user
-        token = create_jwt_token(email)
-
-        # Return success response with CORS headers and JWT token
+        # Return success response with CORS headers
         return {
             'statusCode': 200,
             'headers': {
-                'Access-Control-Allow-Origin': '*',  
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
                 'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
-            'body': json.dumps({'message': 'User registered successfully!', 'token': token})
+            'body': json.dumps({'message': 'User registered successfully!'})
         }
 
     except ClientError as e:
@@ -90,36 +66,33 @@ def register_user(event, context):
         return {
             'statusCode': 500,
             'headers': {
-                'Access-Control-Allow-Origin': '*',  
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
                 'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
             'body': json.dumps({'error': str(e)})
         }
 
-# =======================|| Subscribe User Function with Token Validation ||========================
+# =======================|| Subscribe User Function ||========================
 
 def subscribe_user(event, context):
     try:
         # Parse the input data from the event
         body = json.loads(event['body'])
-        token = body.get('token')  # Token provided by the client in request body
+        email = body.get('email')
         first_name = body.get('firstName')
 
-        # Validate JWT token
-        decoded_token = decode_jwt_token(token)
-        if decoded_token is None:
+        # Check if required fields are present
+        if not email or not first_name:
             return {
-                'statusCode': 401,
+                'statusCode': 400,
                 'headers': {
-                    'Access-Control-Allow-Origin': '*',  # Allow all origins
+                    'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
                     'Access-Control-Allow-Methods': 'POST, OPTIONS'
                 },
-                'body': json.dumps({'message': 'Unauthorized: Invalid or expired token.'})
+                'body': json.dumps({'message': 'Email and First Name are required!'})
             }
-
-        email = decoded_token['email']  # Extract email from the decoded token
 
         # Store the subscription data in the DynamoDB table
         newsletter_table.put_item(
@@ -137,7 +110,7 @@ def subscribe_user(event, context):
         return {
             'statusCode': 200,
             'headers': {
-                'Access-Control-Allow-Origin': '*',  # Allow all origins
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
                 'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
@@ -150,9 +123,52 @@ def subscribe_user(event, context):
         return {
             'statusCode': 500,
             'headers': {
-                'Access-Control-Allow-Origin': '*',  # Ensure CORS headers are included in error response
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
                 'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
             'body': json.dumps({'error': str(e)})
         }
+
+# =======================|| Send Email Function Using SES ||========================
+
+def send_email(email, first_name):
+    sender_email = "info@dyadic.health"  # Replace with your verified sender email
+    subject = "Subscription Confirmation"
+    body_text = f"Hello {first_name},\n\nThank you for subscribing to our newsletter!"
+    body_html = f"""<html>
+    <head></head>
+    <body>
+      <h1>Hello {first_name},</h1>
+      <p>Thank you for subscribing to our newsletter!</p>
+    </body>
+    </html>
+    """
+
+    try:
+        # Use AWS SES to send the email
+        response = ses_client.send_email(
+            Destination={
+                'ToAddresses': [email],
+            },
+            Message={
+                'Body': {
+                    'Html': {
+                        'Charset': 'UTF-8',
+                        'Data': body_html,
+                    },
+                    'Text': {
+                        'Charset': 'UTF-8',
+                        'Data': body_text,
+                    },
+                },
+                'Subject': {
+                    'Charset': 'UTF-8',
+                    'Data': subject,
+                },
+            },
+            Source=sender_email,
+        )
+        print(f"Email sent! Message ID: {response['MessageId']}")
+    except ClientError as e:
+        print(f"Error sending email: {e}")
