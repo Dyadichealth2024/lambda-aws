@@ -146,6 +146,24 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
             allowCredentials: false
+  generateRecoveryReport:
+    handler: recovery_report.lambda_handler
+    memorySize: 1024
+    timeout: 30
+    events:
+      - http:
+          path: recovery-report
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
 
 plugins:
   - serverless-python-requirements
