@@ -41,7 +41,7 @@ def lambda_handler(event, context):
         "message": "Your Recovery Report",
         "data": {
             "sleep": f"You slept for {sleep} hours.",
-            "workoutRecovery": f"You spent {workoutRecovery} minutes on workout recovery.",
+            "workoutRecovery": f"You spent {workoutRecovery} minutes on workout recover.",
             "relaxation": f"You had {relaxation} minutes of relaxation/meditation.",
             "personalizedFeedback": personalized_feedback  # Add personalized feedback to the report
         }
